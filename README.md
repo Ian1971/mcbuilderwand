@@ -4,7 +4,8 @@ Wand that allows buidling geometric shapes in bedrock minecraft
 Hopefully it is self-explanatory. 
 
 ## Quick start ##
-To install double click the mcaddon file
+1. To install double click the mcaddon file
+2. Be sure to enable experimental modding in the world settings
 
 ### Builder wand ###
 1. Find the builder wand in the creative inventory.
