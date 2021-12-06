@@ -1,0 +1,236 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<script src="UIEngine.js"></script>
+	<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+	<div id="_body_" class="screenBox">
+		<div class="GameMessage">
+			<p>Choose options, then click below</p>
+			<span><button id="_cuboid_" onclick="triggerEvent('cuboid');">Cuboid (no undo)</button><button onclick="showHelp('cuboidHelp')" style="display: inline;">?</button></span>
+			<span><button id="_hollowCuboid_" onclick="triggerEvent('hollowCuboid');">Hollow Cube</button><button onclick="showHelp('hollowCuboidHelp')" style="display: inline;">?</button></span>
+			<span><button id="_pyramid_" onclick="triggerEvent('pyramid');">Pyramid</button><button onclick="showHelp('pyramidHelp')" style="display: inline;">?</button></span>
+			<span><button id="_sphere_" onclick="triggerEvent('sphere');">Sphere</button><button onclick="showHelp('sphereHelp')" style="display: inline;">?</button></span>
+			<span><button id="_hemisphere_" onclick="triggerEvent('hemisphere');">Hemisphere</button><button onclick="showHelp('hemisphereHelp')" style="display: inline;">?</button></span>
+			<span><button id="_cylinder_" onclick="triggerEvent('cylinder');" style="display: inline;">Cylinder</button><button onclick="showHelp('cylinderHelp')" style="display: inline;">?</button></span>
+			<span><button id="_cone_" onclick="triggerEvent('cone');" style="display: inline;">Cone</button><button onclick="showHelp('coneHelp')" style="display: inline;">?</button></span>
+			<span><button id="_line_" onclick="triggerEvent('line');">Line</button><button onclick="showHelp('lineHelp')" style="display: inline;">?</button></span>
+			<span><button id="_wall_" onclick="triggerEvent('wall');">Wall</button><button onclick="showHelp('wallHelp')" style="display: inline;">?</button></span>
+			<button id="_undo_" onclick="triggerEvent('undo');">Undo last action</button>
+			<button id="_cancel_" onclick="triggerEvent('cancel');">Cancel</button>
+			<br/>
+			<div id="msg" style="color:red;visibility: hidden;">TEST</div>
+		</div>
+		<div class="GameMessage" style="position: relative;">
+
+			<p style="margin-top: 10px;">Options</p>
+			<h2 >What Direction?</h2>
+			<span id="axis-opts">
+				<button id="x-opt" data-value="x" class="opt" onclick="select(this);" style="display: inline-block;">X = east/west (the sun)</button>
+				<button id="Y-opt" data-value="y" class="opt selected" onclick="select(this);" style="display: inline-block;">Y = up/down</button>
+				<button id="Z-opt" data-value="z" class="opt" onclick="select(this);" style="display: inline-block;">Z = north/south</button>
+			</span>
+			<h2 >What to keep or replace?</h2>
+			<span id="replace-opts">
+				<button id="keep-opt" data-value="keep" class="opt" onclick="select(this);" style="display: inline-block;">Only replaces air</button>
+				<button id="replace-opt" data-value="replace" class="opt selected" onclick="select(this);" style="display: inline-block;">Replace all</button>
+			</span>
+			<h2 >What Block?</h2>
+			<span id="block-opts">
+				<button id="selected-opt" data-value="selected" class="opt selected" onclick="select(this);" style="display: inline-block;">Selected block</button>
+				<button id="air-opt" data-value="air" class="opt" onclick="select(this);" style="display: inline-block;">Air</button>
+				<button id="water-opt" data-value="water" class="opt" onclick="select(this);" style="display: inline-block;">Water</button>
+				<button id="lava-opt" data-value="lava" class="opt" onclick="select(this);" style="display: inline-block;">Lava</button>
+			</span>
+		</div>
+
+		<div id="helpContainer" class="helpbox inactive">
+			<span>
+				<button onclick="closeHelp();" style="height: 2em;float:right;position: relative;">X</button>
+				<div id="coneHelp" class="hide" >
+					<p>The first click is the center of the base circle of the cone. </p>
+					<p>The second click is the radius and height of the cone. </p>
+					<p>Direction options have an effect so you can have a cone along the x axis or z axis as well. </p>
+				</div>
+				<div id="cylinderHelp" class="hide" >
+					<p>The first click is the center of the base circle of the cylinder. </p>
+					<p>The second click is the radius and height of the cylinder. </p>
+					<p>Direction options have an effect so you can have a cylinder along the x axis or z axis as well. </p>
+				</div>
+				<div id="pyramidHelp" class="hide">
+					<p>The first click is the center of the base of the pyramid. </p>
+					<p>The second click is the half the width of the base and height of the pyramid. </p>
+					<p>Direction options have an effect so you can have a pyramid along the x axis or z axis as well. </p>
+				</div>
+				<div id="hollowCuboidHelp" class="hide">
+					<p>Draws a cuboid open at each end (depending on direction chosen)</p>
+					<p>The first click is the center of the base of the cuboid. </p>
+					<p>The second click is the half the width of the base and height of the cuboid. </p>
+					<p>Direction options have an effect so you can have a pyramid along the x axis or z axis as well. </p>
+				</div>
+				<div id="cuboidHelp" class="hide">
+					<p>Draws a filled cuboid (identical to fill command)</p>
+					<p>The first click one corner of the cuboid. </p>
+					<p>The second click is the opposite corner of the cuboid. </p>
+					<p>Direction has no effect. </p>
+					<p>There is NO undo</p>
+				</div>
+				<div id="sphereHelp" class="hide">
+					<p>Draws a sphere</p>
+					<p>The first click is the center of the sphere. </p>
+					<p>The second click is the edge of the sphere (i.e. radius). </p>
+					<p>Direction has no effect. </p>
+				</div>	
+				<div id="hemisphereHelp" class="hide">
+					<p>Draws a hemisphere (dome)</p>
+					<p>The first click is the center of the hemisphere. </p>
+					<p>The second click is the edge of the hemisphere (i.e. radius). </p>
+					<p>Direction has no effect. </p>
+				</div>
+				<div id="lineHelp" class="hide">
+					<p>Draws a 3d line between two points</p>
+					<p>The first click is the start of the line. </p>
+					<p>The second click is the end of the line. </p>
+					<p>Direction has no effect. </p>
+				</div>
+				<div id="wallHelp" class="hide">
+					<p>Draws a wall</p>
+					<p>The first click is the start of the bottom wall. </p>
+					<p>The second click is the end of the top of wall. (or vice-versa)</p>
+					<p>Direction has no effect. </p>
+				</div>
+				
+			</span>
+		</div>
+		
+	</div>
+</body>
+
+<script type="text/javascript">
+
+function hasClass(element, className) {
+    return (' ' + element.className + ' ').indexOf(' ' + className+ ' ') > -1;
+}
+
+function direction() {
+	let dir = getSelected("axis-opts");
+
+	return "_" + dir;
+}
+
+
+function replace() {
+	let dir = getSelected("replace-opts");
+
+	return "_" + dir;
+}
+
+function block() {
+	let dir = getSelected("block-opts");
+
+	return "_" + dir;
+}
+
+getSiblings = function (elem) {
+
+	// Setup siblings array and get the first sibling
+	var siblings = [];
+	var sibling = elem.parentNode.firstChild;
+
+	// Loop through each sibling and push to the array
+	while (sibling) {
+		if (sibling.nodeType === 1 && sibling !== elem) {
+			siblings.push(sibling);
+		}
+		sibling = sibling.nextSibling
+	}
+
+	return siblings;
+
+};
+
+getSelected = function(id) {
+	let parent = document.getElementById(id);
+	let selected = parent.getElementsByClassName("selected")[0];
+	return selected.getAttribute("data-value");
+}
+
+select = function(element) {
+	element.classList.add('selected');
+
+	let siblings = getSiblings(element);
+	siblings.forEach(element => {
+		element.classList.remove('selected');
+	});
+
+	// document.getElementById("_axis_").value = getSelected("axis-opts");
+
+}
+
+setActive = function(element) {
+	element.classList.add('active');
+	element.classList.remove('inactive');
+
+}
+
+setInactive = function(element) {
+	element.classList.remove('active');
+	element.classList.add('inactive');
+	
+}
+
+setShow = function(element) {
+	element.classList.add('show');
+	element.classList.remove('hide');
+
+}
+
+setHide = function(element) {
+	element.classList.remove('show');
+	element.classList.add('hide');
+	
+}
+	let scriptInterface = undefined;
+	if (typeof engine !== 'undefined') {
+		engine.on("facet:updated:core.scripting", function(interface) {
+			scriptInterface = interface;
+			
+		});
+		engine.trigger("facet:request", ["core.scripting"]);
+	}
+
+triggerEvent = function(action){ 
+	let msg = document.getElementById("msg");
+	msg.classList.toggle('active');
+	
+	const data = action + direction() + block() + replace();
+	
+	msg.innerText = data;
+	scriptInterface.triggerEvent(data);
+}
+
+var currentHelp = null;
+showHelp = function(helpType) {
+	if (currentHelp) {
+		closeHelp();
+	}
+	currentHelp = helpType;
+
+	const help = document.getElementById(helpType);
+	//const helpContent = document.getElementById("helpContent");
+	//helpContent.innerText = help.innerText;
+	setShow(help);
+	setActive(document.getElementById("helpContainer"));
+}
+
+closeHelp = function() {
+	setHide(document.getElementById(currentHelp));
+	setInactive(document.getElementById("helpContainer"));
+	currentHelp = null;
+}
+
+</script>
+</html>
