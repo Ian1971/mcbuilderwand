@@ -13,13 +13,13 @@
             "type": "data",
             "uuid": "92b41d51-6aef-427f-ab3c-44d2da19f1a9",
             "version": [0, 9, 0]
-        },
-        {
-            "description": "Builder wand client scripts module",
-            "type": "client_data",
-            "uuid": "13bb5fa3-13a7-474c-9fe6-e547445892a6",
-            "version": [0, 9, 0]
-        }
+        }//,
+        // {
+        //     "description": "Builder wand client scripts module",
+        //     "type": "client_data",
+        //     "uuid": "13bb5fa3-13a7-474c-9fe6-e547445892a6",
+        //     "version": [0, 9, 0]
+        // }
     ],
     "dependencies": [
         {

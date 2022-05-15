@@ -1,0 +1,29 @@
+{
+  "format_version": "1.12",
+  "minecraft:recipe_shaped": {
+    "description": {
+    "identifier": "dabby:builder_gem"
+    },   
+    "tags": [ "crafting_table" ],
+    "pattern": [
+      "[[[",
+      "[$[",
+      "..."
+    ],
+    "key": {
+      "[": {
+        "item": "minecraft:hardened_clay",
+        "data": 15
+      },
+      ".": {
+        "item": "minecraft:diamond"
+      },
+      "$": {
+        "item": "minecraft:emerald"
+      }
+    },
+    "result": {
+      "item": "dabby:builder_gem"
+    }
+  }
+}

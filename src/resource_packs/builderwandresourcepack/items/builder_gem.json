@@ -1,0 +1,13 @@
+{
+  "format_version": "1.10",
+  "minecraft:item": {
+    "description": {
+      "identifier": "dabby:builder_gem",
+      "category": "Equipment"
+    },
+    "components": {
+      "minecraft:icon": "builder_gem",
+      "minecraft:render_offsets": "tools"
+    }
+  }
+}
