@@ -1,4 +1,5 @@
 import { world, BlockLocation } from "mojang-minecraft";
+import { ActionFormData } from "mojang-minecraft-ui";
 import * as logging from "./logging";
 import * as enums from "./enums";
 import * as sphere from "./drawing/sphere";
@@ -11,7 +12,26 @@ let tickIndex = 0;
 let lastActionTick = -1;
 const playerWandStates = new Map();
 //undo buffer is a map from play to an array of blocks
-const undo = new Map();
+const undoMap = new Map();
+const cancel = "cancel";
+const undo = "undo";
+const sphereAction = "sphere";
+const actions = [
+    "cuboid",
+    "hollow cuboid",
+    "pyramid",
+    "sphere",
+    "hemisphere",
+    "cone",
+    "line",
+    "wall",
+    undo,
+    cancel,
+];
+const actionMap = new Map();
+for (let i = 0; i < actions.length; i++) {
+    actionMap.set(actions[i], i);
+}
 function mainTick() {
     tickIndex++;
     // if (tickIndex % 100 === 0) {
@@ -43,35 +63,81 @@ function useWand(args) {
         wandState.firstBlock = clickedBlock.id;
         wandState.state = enums.WandState.SelectedBlock;
         logging.log(`Selected block ${wandState.firstBlock}`);
+        const actionChooseForm = new ActionFormData()
+            .title("Action")
+            .body("What would you like to do?");
+        for (let i = 0; i < actions.length; i++) {
+            actionChooseForm.button(actions[i]);
+        }
+        actionChooseForm.show(args.source).then((response) => {
+            world.getDimension("overworld").runCommand(`say you chose ${response.selection}`);
+            wandState.actionIndex = response.selection;
+            if (actions[wandState.actionIndex] === cancel) {
+                transitionToInitial(args.source);
+                return;
+            }
+            else if (actions[wandState.actionIndex] === undo) {
+                //TODO: handle undo
+                transitionToInitial(args.source);
+                return;
+            }
+            else if (actions[wandState.actionIndex] === sphereAction) {
+                logging.log(`You have chosen to create a sphere using ${wandState.firstBlock}`);
+                logging.log(`The first click choose the center.`);
+                logging.log(`The second click defines the radius.`);
+                return;
+            }
+        });
+        if (wandState.state === enums.WandState.SelectedBlock) {
+            wandState.firstPosition = args.blockLocation;
+            wandState.state = enums.WandState.SelectedFirstPosition;
+            logging.log(`SelectedFirstPosition ${wandState.firstPosition}`);
+        }
+        else if (wandState.state === enums.WandState.SelectedFirstPosition) {
+            wandState.secondPosition = args.blockLocation;
+            wandState.state = enums.WandState.SelectedSecondPosition;
+            logging.log(`SelectedSecondPosition ${wandState.secondPosition}`);
+            logging.log(`GO ${JSON.stringify(wandState)}`);
+            //TODO: UI
+            const dir = vector.vectorAToB(wandState.firstPosition, wandState.secondPosition);
+            const radius = Math.round(vector.magnitude(dir));
+            let map = sphere.sphere_of_radius(radius);
+            let replaceOrKeep = "replace";
+            let variant = 0;
+            draw(map, wandState.firstBlock, wandState.firstPosition, args.source, replaceOrKeep, variant);
+            transitionToInitial(args.source);
+        }
+        //   const form = new ModalFormData()
+        //   .title("Action")
+        //   .dropdown("What would you like to do?", 
+        //   ["cuboid",
+        //   "hollowCuboid",
+        //   "pyramid",
+        //   "Sphere",
+        //   "hemisphere",
+        //   "cone",
+        //   "line",
+        //   "wall",
+        //   "undo last action"],
+        //   3)
+        //   ;
+        // form.show(<Player>args.source).then((response) => {
+        //     world.getDimension("overworld").runCommand(`say you chose ${response.formValues![0]}`);
+        // });
+        // logging.log(`Selected block ${args.item.id}`);
+        // if (playerWandStates[args.source.nameTag])
     }
-    else if (wandState.state === enums.WandState.SelectedBlock) {
-        wandState.firstPosition = args.blockLocation;
-        wandState.state = enums.WandState.SelectedFirstPosition;
-        logging.log(`SelectedFirstPosition ${wandState.firstPosition}`);
-    }
-    else if (wandState.state === enums.WandState.SelectedFirstPosition) {
-        wandState.secondPosition = args.blockLocation;
-        wandState.state = enums.WandState.SelectedSecondPosition;
-        logging.log(`SelectedSecondPosition ${wandState.secondPosition}`);
-        logging.log(`GO ${JSON.stringify(wandState)}`);
-        //TODO: UI
-        const dir = vector.vectorAToB(wandState.firstPosition, wandState.secondPosition);
-        const radius = Math.round(vector.magnitude(dir));
-        let map = sphere.sphere_of_radius(radius);
-        let replaceOrKeep = "replace";
-        let variant = 0;
-        draw(map, wandState.firstBlock, wandState.firstPosition, args.source, replaceOrKeep, variant);
-        wandState = new PlayerWandState();
-        playerWandStates.set(args.source.nameTag, wandState);
-    }
-    // logging.log(`Selected block ${args.item.id}`);
-    // if (playerWandStates[args.source.nameTag])
 }
 function playerJoin(args) {
     playerWandStates.set(args.player.name, new PlayerWandState());
 }
 function playerLeave(args) {
     playerWandStates.delete(args.playerName);
+}
+//changes wand state back to initial
+function transitionToInitial(entity) {
+    let wandState = new PlayerWandState();
+    playerWandStates.set(entity.nameTag, wandState);
 }
 world.events.tick.subscribe(mainTick);
 world.events.playerJoin.subscribe(playerJoin);
@@ -84,12 +150,13 @@ class PlayerWandState {
         this.firstBlock = "";
         this.firstPosition = new BlockLocation(0, 0, 0);
         this.secondPosition = new BlockLocation(0, 0, 0);
+        this.actionIndex = actionMap.get(cancel);
     }
 }
 function draw(map, blockName, startPos, player, replaceOrKeep, variant) {
     //create undo buffer for this action
     let thisUndo = new Array();
-    undo.set(player.id, thisUndo);
+    undoMap.set(player.id, thisUndo);
     //let commands = new Array();
     map.map.forEach(element => {
         //log(element);
