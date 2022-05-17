@@ -1,4 +1,5 @@
 import { BlockLocation } from "mojang-minecraft";
+import * as logging from "./../logging";
 export function vectorAToB(startPos, endPos) {
     return new BlockLocation(endPos.x - startPos.x, endPos.y - startPos.y, endPos.z - startPos.z);
 }
@@ -12,7 +13,7 @@ export function push_to_map(map, item, used) {
     //check we don't already have it
     const posid = item.x + "|" + item.y + "|" + item.z;
     if (used.get(posid)) {
-        // logging.log(` used ${posid}`);
+        logging.log(` used ${posid}`);
         return;
     }
     used.set(posid, true);

@@ -47,13 +47,12 @@ function sphere(x0, y0, z0, r, col, n) {
             if (zz < 0)
                 continue;
             zr = Math.sqrt(zz);
-            var location = new BlockLocation(x, y, z);
             z = Math.round(z0 - zr);
             if ((z > 0) && (z < n))
-                vector.push_to_map(map, location, used);
+                vector.push_to_map(map, new BlockLocation(x, y, z), used);
             z = Math.round(z0 + zr);
             if ((z > 0) && (z < n))
-                vector.push_to_map(map, location, used);
+                vector.push_to_map(map, new BlockLocation(x, y, z), used);
         }
     // project xz plane
     for (x = xa, xr = x - x0, xx = xr * xr; x < xb; x++, xr++, xx = xr * xr)
@@ -62,13 +61,12 @@ function sphere(x0, y0, z0, r, col, n) {
             if (yy < 0)
                 continue;
             yr = Math.sqrt(yy);
-            var location = new BlockLocation(x, y, z);
             y = Math.round(y0 - yr);
             if ((y > 0) && (y < n))
-                vector.push_to_map(map, location, used);
+                vector.push_to_map(map, new BlockLocation(x, y, z), used);
             y = Math.round(y0 + yr);
             if ((y > 0) && (y < n))
-                vector.push_to_map(map, location, used);
+                vector.push_to_map(map, new BlockLocation(x, y, z), used);
         }
     // project yz plane
     for (y = ya, yr = y - y0, yy = yr * yr; y < yb; y++, yr++, yy = yr * yr)
@@ -77,13 +75,12 @@ function sphere(x0, y0, z0, r, col, n) {
             if (xx < 0)
                 continue;
             xr = Math.sqrt(xx);
-            var location = new BlockLocation(x, y, z);
             x = Math.round(x0 - xr);
             if ((x > 0) && (x < n))
-                vector.push_to_map(map, location, used);
+                vector.push_to_map(map, new BlockLocation(x, y, z), used);
             x = Math.round(x0 + xr);
             if ((x > 0) && (x < n))
-                vector.push_to_map(map, location, used);
+                vector.push_to_map(map, new BlockLocation(x, y, z), used);
         }
     return map;
 }

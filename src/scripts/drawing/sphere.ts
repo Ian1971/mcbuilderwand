@@ -44,27 +44,27 @@ function sphere( x0:number, y0:number, z0:number, r:number, col:number, n:number
      for (y=ya,yr=y-y0,yy=yr*yr;y<yb;y++,yr++,yy=yr*yr)
         {
         zz=rr-xx-yy; if (zz<0) continue; zr=Math.sqrt(zz);
-        var location = new BlockLocation(x,y,z);
-        z=Math.round(z0-zr); if ((z>0)&&(z<n)) vector.push_to_map(map,location,used);
-        z=Math.round(z0+zr); if ((z>0)&&(z<n)) vector.push_to_map(map,location,used);
+
+        z=Math.round(z0-zr); if ((z>0)&&(z<n)) vector.push_to_map(map,new BlockLocation(x,y,z),used);
+        z=Math.round(z0+zr); if ((z>0)&&(z<n)) vector.push_to_map(map,new BlockLocation(x,y,z),used);
         }
     // project xz plane
     for (x=xa,xr=x-x0,xx=xr*xr;x<xb;x++,xr++,xx=xr*xr)
      for (z=za,zr=z-z0,zz=zr*zr;z<zb;z++,zr++,zz=zr*zr)
         {
         yy=rr-xx-zz; if (yy<0) continue; yr=Math.sqrt(yy);
-        var location = new BlockLocation(x,y,z);
-        y=Math.round(y0-yr); if ((y>0)&&(y<n)) vector.push_to_map(map,location,used);
-        y=Math.round(y0+yr); if ((y>0)&&(y<n)) vector.push_to_map(map,location,used);
+
+        y=Math.round(y0-yr); if ((y>0)&&(y<n)) vector.push_to_map(map,new BlockLocation(x,y,z),used);
+        y=Math.round(y0+yr); if ((y>0)&&(y<n)) vector.push_to_map(map,new BlockLocation(x,y,z),used);
         }
     // project yz plane
     for (y=ya,yr=y-y0,yy=yr*yr;y<yb;y++,yr++,yy=yr*yr)
      for (z=za,zr=z-z0,zz=zr*zr;z<zb;z++,zr++,zz=zr*zr)
         {
         xx=rr-zz-yy; if (xx<0) continue; xr=Math.sqrt(xx);
-        var location = new BlockLocation(x,y,z);
-        x=Math.round(x0-xr); if ((x>0)&&(x<n)) vector.push_to_map(map,location,used);
-        x=Math.round(x0+xr); if ((x>0)&&(x<n)) vector.push_to_map(map,location,used);
+
+        x=Math.round(x0-xr); if ((x>0)&&(x<n)) vector.push_to_map(map,new BlockLocation(x,y,z),used);
+        x=Math.round(x0+xr); if ((x>0)&&(x<n)) vector.push_to_map(map,new BlockLocation(x,y,z),used);
         }
 
     return map;

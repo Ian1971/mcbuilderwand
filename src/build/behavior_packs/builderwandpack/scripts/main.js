@@ -58,10 +58,11 @@ function useWand(args) {
         const dir = vector.vectorAToB(wandState.firstPosition, wandState.secondPosition);
         const radius = Math.round(vector.magnitude(dir));
         let map = sphere.sphere_of_radius(radius);
-        wandState = new PlayerWandState();
-        let replaceOrKeep = "keep";
+        let replaceOrKeep = "replace";
         let variant = 0;
         draw(map, wandState.firstBlock, wandState.firstPosition, args.source, replaceOrKeep, variant);
+        wandState = new PlayerWandState();
+        playerWandStates.set(args.source.nameTag, wandState);
     }
     // logging.log(`Selected block ${args.item.id}`);
     // if (playerWandStates[args.source.nameTag])
@@ -103,8 +104,8 @@ function draw(map, blockName, startPos, player, replaceOrKeep, variant) {
         thisUndo.push(new UndoItem(currentBlock, blockState));
         const command = `setblock ${x} ${y} ${z} ${blockName} ${variant} ${replaceOrKeep}`;
         try {
+            logging.log(`inside map array command:${command} `);
             let response = world.getDimension("overworld").runCommand(command);
-            logging.log(`inside map array command:${command} response:${JSON.stringify(response)}`);
         }
         catch (error) {
             //ignore errors for now
