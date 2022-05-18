@@ -6,3 +6,9 @@ export enum WandState{
     
 }
 
+export enum Dialog{
+    ActionChoose,
+    OptionChoose
+    
+}
+
