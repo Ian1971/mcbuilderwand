@@ -1,6 +1,25 @@
 import { BlockLocation } from "mojang-minecraft";
 import * as vector from "./vector";
-export function sphere_of_radius(r) {
+import { Action } from "./../action";
+import * as logging from "./../logging";
+import { MapWithOffset } from "./vector";
+export class Sphere extends Action {
+    constructor() {
+        super("sphere", false, true, true);
+    }
+    execute(wandState) {
+        const dir = vector.vectorAToB(wandState.firstPosition, wandState.secondPosition);
+        const radius = Math.round(vector.magnitude(dir));
+        let map = sphere_of_radius(radius);
+        return map;
+    }
+    message(wandState) {
+        logging.log(`You have chosen to create a sphere using ${wandState.firstBlock}`);
+        logging.log(`The first click choose the center.`);
+        logging.log(`The second click defines the radius.`);
+    }
+}
+function sphere_of_radius(r) {
     const a = r + 3;
     const n = a << 1;
     return new MapWithOffset(sphere(a, a, a, r, 1, n), new BlockLocation(a, a, a));
@@ -9,12 +28,6 @@ export function hemisphere_of_radius(r) {
     const a = r + 3;
     const n = a << 1;
     return new MapWithOffset(sphere(a, 0, a, r, 1, n), new BlockLocation(a, 0, a));
-}
-export class MapWithOffset {
-    constructor(map, offset) {
-        this.map = map;
-        this.offset = offset;
-    }
 }
 //draw sphere centered x0,y0,z0 of radius r, constrained in box of size n
 function sphere(x0, y0, z0, r, col, n) {

@@ -19,6 +19,12 @@ export function push_to_map(map, item, used) {
     used.set(posid, true);
     map.push(item);
 }
+export class MapWithOffset {
+    constructor(map, offset) {
+        this.map = map;
+        this.offset = offset;
+    }
+}
 function push_to_map_axis(map, item, used, axis) {
     if (axis === "x") {
         var mapLocation = new BlockLocation(item.y, Math.round(item.x), Math.round(item.z));

@@ -2,10 +2,9 @@ import { world, Block, ItemStack, Entity, ItemUseEvent, BlockBreakEvent, PlayerJ
 import {MessageFormData, ActionFormData, ModalFormData} from "mojang-minecraft-ui"
 import * as logging from "./logging";
 import * as enums from "./enums"
-import * as sphere from "./drawing/sphere"
-import * as vector from "./drawing/vector"
-import {Action} from "./action"
-import {PlayerMessage, PlayerWandState} from "./playerwandstate"
+import { MapWithOffset } from "./drawing/vector";
+import { PlayerMessage, PlayerWandState } from "./action"
+import { ActionList, cancel, undo } from "./actionlist";
 
 //TODO: use other dimensions - currently just overworld
 //TODO: give option of using current player position when click or the clicked block
@@ -19,39 +18,12 @@ const playerMessaging = new Map<string, PlayerMessage>();
 //undo buffer is a map from play to an array of blocks
 const undoMap = new Map<string, Array<UndoItem>>();
 
-const cancel:Action = new Action("cancel");
-const undo:Action = new Action("undo");
-const cuboidAction:Action = new Action("cuboid", false);
-const hollowCuboidAction:Action = new Action("hollow cuboid");
-const pyramidAction:Action = new Action("pyramid");
-const sphereAction:Action = new Action("sphere", false);
-const hemisphereAction:Action = new Action("hemisphere", false);
-const coneAction:Action = new Action("cone");
-const lineAction:Action = new Action("line");
-const wallAction:Action = new Action("wall", false);
-const actions:Action[] = [
-  cuboidAction,
-  hollowCuboidAction,
-  pyramidAction,
-  sphereAction,
-  hemisphereAction,
-  coneAction,
-  lineAction,
-  wallAction,
-  undo,
-  cancel,
-]
-const actionMap = new Map<string, number>();
-for (let i = 0; i < actions.length; i++) {
-  actionMap.set(actions[i].name, i);
-}
-
 function mainTick() {
   tickIndex++;
 
-  // if (tickIndex % 100 === 0) {
-  //   world.getDimension("overworld").runCommand("say Hello starter1!");
-  // }
+  if (tickIndex % 10 === 0) {
+    world.getDimension("overworld").runCommand("say Hello starter1!");
+  }
 
   //check if we need to show a dialog to a user (used to handle multiple dialogs, because
   //for some reason it doesn't show a second dialog unless control returned
@@ -65,20 +37,19 @@ function mainTick() {
       if (msg.dialog === enums.Dialog.OptionChoose) {
         //some action is chosen so show the options for it
         const optionForm = new ModalFormData()
-        .title("Options");
+        .title("Choose options");
 
         if (msg.wandState.action.keepReplaceOpt){
-          optionForm.toggle("Keep", false);
+          optionForm.toggle("Keep existing blocks", false);
         }
 
         if (msg.wandState.action.blockOpt){
-          optionForm.dropdown(`Block (selected = ${msg.wandState.firstBlock}`, ["selected","air", "water", "lava"], 0);
+          optionForm.dropdown(`Use Block (selected = ${msg.wandState.firstBlock}`, ["selected","air", "water", "lava"], 0);
         }
         if (msg.wandState.action.directionOpt){
           optionForm.dropdown(`Direction`, ["x", "y", "z"], 0);
         }
 
-        optionForm.textField('test', 'val');
         // logging.log(`about to show optionForm`);
         optionForm.show(msg.player).then(optionResponse => {
           msg.wandState.keep = optionResponse.formValues![0];
@@ -88,11 +59,7 @@ function mainTick() {
           playerWandStates.set(msg.player.name, msg.wandState);
           //setup selected action
           msg.wandState.action.message(msg.wandState);
-          if (msg.wandState.action === sphereAction) {
-              logging.log(`You have chosen to create a sphere using ${msg.wandState.firstBlock}`);
-              logging.log(`The first click choose the center.`);
-              logging.log(`The second click defines the radius.`);
-            }
+
         });
 
       }
@@ -142,8 +109,9 @@ async function useWand(args: ItemUseOnEvent) {
     const actionChooseForm = new ActionFormData()
     .title("Action")
     .body("What would you like to do?");
-    for (let i = 0; i < actions.length; i++) {
-      actionChooseForm.button(actions[i].name);
+
+    for (let i = 0; i < ActionList.actions.length; i++) {
+      actionChooseForm.button(ActionList.actions[i].name);
     }
 
     let showOptionForm = false;
@@ -154,7 +122,7 @@ async function useWand(args: ItemUseOnEvent) {
     if(response){
       logging.log(`you chose ${response.selection!}`);
 
-      wandState.action = actions[response.selection!] ;
+      wandState.action = ActionList.actions[response.selection!] ;
       if (wandState.action === cancel) {
         transitionToInitial(player);
         return;
@@ -173,37 +141,31 @@ async function useWand(args: ItemUseOnEvent) {
       const message = new PlayerMessage(wandState, enums.Dialog.OptionChoose, player);
       playerMessaging.set(player.name, message);
       return;
+    }  
+  }
 
-    }
-    //set block position
-    if (wandState.state === enums.WandState.SelectedBlock){
+  //set block position
+  if (wandState.state === enums.WandState.SelectedBlock){
     
-      wandState.firstPosition = args.blockLocation;
-      wandState.state = enums.WandState.SelectedFirstPosition;
-  
-      logging.log(`SelectedFirstPosition ${wandState.firstPosition}`);
-    }
-    else if (wandState.state === enums.WandState.SelectedFirstPosition){
-      
-      wandState.secondPosition = args.blockLocation;
-      wandState.state = enums.WandState.SelectedSecondPosition;
-  
-      logging.log(`SelectedSecondPosition ${wandState.secondPosition}`);
-  
-      logging.log(`GO ${JSON.stringify(wandState)}`);
-      
-      //TODO: UI
-      const dir = vector.vectorAToB(wandState.firstPosition, wandState.secondPosition);
-      const radius = Math.round(vector.magnitude(dir));
-  
-      let map = sphere.sphere_of_radius(radius);
+    wandState.firstPosition = args.blockLocation;
+    wandState.state = enums.WandState.SelectedFirstPosition;
 
-      let variant = 0;
-      draw(map, args.source, variant, wandState);
-  
-      transitionToInitial(args.source);    
-    }
-  
+    logging.log(`SelectedFirstPosition ${wandState.firstPosition}`);
+  }
+  else if (wandState.state === enums.WandState.SelectedFirstPosition){
+    
+    wandState.secondPosition = args.blockLocation;
+    wandState.state = enums.WandState.SelectedSecondPosition;
+
+    logging.log(`SelectedSecondPosition ${wandState.secondPosition}`);
+
+    // logging.log(`GO ${JSON.stringify(wandState)}`);
+
+    let map = wandState.action.execute(wandState); //slightly odd syntax but sort later
+    let variant = 0;
+    draw(map, args.source, variant, wandState);
+
+    transitionToInitial(args.source);    
   }
 }
 
@@ -226,7 +188,7 @@ world.events.playerJoin.subscribe(playerJoin);
 world.events.playerLeave.subscribe(playerLeave);
 world.events.itemUseOn.subscribe(itemUseOn);
 
-function draw(map:sphere.MapWithOffset, 
+function draw(map:MapWithOffset, 
   player:Entity, 
   variant:number,
   wandState: PlayerWandState) {

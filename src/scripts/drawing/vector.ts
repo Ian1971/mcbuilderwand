@@ -31,6 +31,15 @@ export function push_to_map(map: Array<BlockLocation>, item:BlockLocation, used:
     map.push(item);
 }
 
+export class MapWithOffset{
+    map: Array<BlockLocation>
+    offset: BlockLocation
+
+    constructor(map: Array<BlockLocation>, offset: BlockLocation){
+        this.map = map;
+        this.offset = offset;
+    }
+}
 
 function push_to_map_axis(map: Array<BlockLocation>, item: BlockLocation, used: Map<string, boolean>, axis: string) {
     if (axis === "x")  {
