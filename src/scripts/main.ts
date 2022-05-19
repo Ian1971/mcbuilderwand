@@ -21,14 +21,14 @@ const undoMap = new Map<string, Array<UndoItem>>();
 function mainTick() {
   tickIndex++;
 
-  if (tickIndex % 10 === 0) {
-    world.getDimension("overworld").runCommand("say Hello starter1!");
-  }
+  // if (tickIndex % 10 === 0) {
+  //   world.getDimension("overworld").runCommand("say alive");
+  // }
 
   //check if we need to show a dialog to a user (used to handle multiple dialogs, because
   //for some reason it doesn't show a second dialog unless control returned
   playerMessaging.forEach( (msg, key, map) => {
-    logging.log("in player messaging");
+    // logging.log("in player messaging");
     //handle the message
     if (msg){
       //delete so we don't show it again
@@ -36,16 +36,20 @@ function mainTick() {
   
       if (msg.dialog === enums.Dialog.OptionChoose) {
         //some action is chosen so show the options for it
+        //TODO: modal form doesn't look great currently but will do for now
+
+        //TODO: option to choose the block above the one clicked
         const optionForm = new ModalFormData()
         .title("Choose options");
-
+        optionForm.icon
         if (msg.wandState.action.keepReplaceOpt){
-          optionForm.toggle("Keep existing blocks", false);
+          optionForm.toggle("Keep existing blocks?", false);
+        }
+        optionForm.toggle("Place above chosen location?", false);
+        if (msg.wandState.action.blockOpt){
+          optionForm.dropdown(`Use Block (selected = ${msg.wandState.firstBlock.id}`, ["selected","air", "water", "lava"], 0);
         }
 
-        if (msg.wandState.action.blockOpt){
-          optionForm.dropdown(`Use Block (selected = ${msg.wandState.firstBlock}`, ["selected","air", "water", "lava"], 0);
-        }
         if (msg.wandState.action.directionOpt){
           optionForm.dropdown(`Direction`, ["x", "y", "z"], 0);
         }
@@ -53,9 +57,14 @@ function mainTick() {
         // logging.log(`about to show optionForm`);
         optionForm.show(msg.player).then(optionResponse => {
           msg.wandState.keep = optionResponse.formValues![0];
-          msg.wandState.blockOpt = optionResponse.formValues![1];
-          msg.wandState.direction = optionResponse.formValues![2] ;
+          msg.wandState.blockOpt = optionResponse.formValues![2];
+          msg.wandState.direction = optionResponse.formValues![3] ;
+          msg.wandState.above = optionResponse.formValues![1] ;
 
+          logging.log(`above: ${optionResponse.formValues![1]}`);
+          logging.log(`blockOpt: ${optionResponse.formValues![2]}`);
+          logging.log(`direction: ${optionResponse.formValues![3]}`);
+          logging.log(`keep: ${optionResponse.formValues![0]}`);
           playerWandStates.set(msg.player.name, msg.wandState);
           //setup selected action
           msg.wandState.action.message(msg.wandState);
@@ -162,8 +171,14 @@ async function useWand(args: ItemUseOnEvent) {
     // logging.log(`GO ${JSON.stringify(wandState)}`);
 
     let map = wandState.action.execute(wandState); //slightly odd syntax but sort later
-    let variant = 0;
-    draw(map, args.source, variant, wandState);
+
+    //if we got a map draw it.
+    //if we didn't get a map then the action may have used some other commands
+    if (map){
+      let variant = 0;
+      draw(map, args.source, variant, wandState);
+  
+    }
 
     transitionToInitial(args.source);    
   }
@@ -217,7 +232,7 @@ function draw(map:MapWithOffset,
     //TODO: get variant from wandState.block.permutation
     const replaceOrKeep = wandState.keep ? "keep" : "replace";
 
-		const command = `setblock ${x} ${y} ${z} ${wandState.firstBlock.id} ${variant} ${replaceOrKeep}`;
+		const command = `setblock ${x} ${y} ${z} ${wandState.firstBlock.id} ${variant} ${wandState.replaceOrKeep}`;
 
     try {
       

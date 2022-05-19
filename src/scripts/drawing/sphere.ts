@@ -1,7 +1,6 @@
-import { Block, BlockLocation, Player } from "mojang-minecraft";
+import { BlockLocation, Player } from "mojang-minecraft";
 import * as vector from "./vector";
-import {Action} from "./../action"
-import {PlayerWandState} from "./../playerwandstate"
+import {Action, PlayerWandState} from "./../action"
 import * as logging from "./../logging"
 import { MapWithOffset} from "./vector";
 
@@ -12,7 +11,7 @@ export class Sphere extends Action {
     super("sphere", false, true, true);
     }
     
-    execute(wandState: PlayerWandState):MapWithOffset 
+    execute(wandState: PlayerWandState):MapWithOffset | null 
     {
         const dir = vector.vectorAToB(wandState.firstPosition, wandState.secondPosition);
         const radius = Math.round(vector.magnitude(dir));

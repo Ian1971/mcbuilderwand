@@ -55,3 +55,7 @@ function push_to_map_axis(map: Array<BlockLocation>, item: BlockLocation, used: 
         push_to_map(map,mapLocation,used);
     }  
 }
+
+export function above(above: boolean, y:number) : number {
+    return above ? y + 1 : y;
+}

@@ -39,3 +39,6 @@ function push_to_map_axis(map, item, used, axis) {
         push_to_map(map, mapLocation, used);
     }
 }
+export function above(above, y) {
+    return above ? y + 1 : y;
+}

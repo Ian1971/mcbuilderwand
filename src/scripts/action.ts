@@ -1,8 +1,48 @@
 import * as logging from "./logging";
-import {PlayerWandState} from "./playerwandstate"
 import { MapWithOffset } from "./drawing/vector";
-import {Sphere} from "./drawing/sphere"
-import { BlockLocation } from "mojang-minecraft";
+import { Block, BlockLocation, Player }from "mojang-minecraft";
+import {Dialog, WandState} from "./enums"
+
+export class PlayerMessage{
+  wandState: PlayerWandState;
+  dialog: Dialog;
+  player: Player;
+
+  constructor(wandState: PlayerWandState, dialog: Dialog, player: Player) {
+    this.wandState = wandState;
+    this.dialog = dialog;
+    this.player = player;
+  }
+}
+export class PlayerWandState {
+    state: WandState;
+    firstBlock: Block;
+    firstPosition: BlockLocation;
+    secondPosition: BlockLocation;
+    action: Action;
+    keep: boolean;
+    blockOpt: number;
+    direction: number;
+    above: boolean;
+  
+  
+    constructor() {
+      this.state = WandState.Initial;
+      this.firstBlock = null!;
+      this.firstPosition = new BlockLocation(0,0,0);
+      this.secondPosition = new BlockLocation(0,0,0);
+      this.action = null!;
+      this.keep = false;
+      this.blockOpt = 0;
+      this.direction = 0;
+      this.above = false;
+    }
+
+    get replaceOrKeep():string{
+      const replaceOrKeep = this.keep ? "keep" : "replace";
+      return replaceOrKeep;
+    }
+  }
 
 export class Action {
     name: string;
@@ -17,7 +57,7 @@ export class Action {
       this.blockOpt = blockOpt;
     }
   
-    execute(wandState: PlayerWandState) : MapWithOffset
+    execute(wandState: PlayerWandState) : MapWithOffset | null 
     {
       logging.log(`Should not get here. Need a concrete action`);
       return new MapWithOffset([], new BlockLocation(0,0,0));
@@ -30,31 +70,4 @@ export class Action {
   }
 
 
-  
-export const cancel:Action = new Action("cancel");
-export const undo:Action = new Action("undo");
-const cuboidAction:Action = new Action("cuboid", false);
-const hollowCuboidAction:Action = new Action("hollow cuboid");
-const pyramidAction:Action = new Action("pyramid");
-const sphereAction:Action = new Sphere();
-const hemisphereAction:Action = new Action("hemisphere", false);
-const coneAction:Action = new Action("cone");
-const lineAction:Action = new Action("line");
-const wallAction:Action = new Action("wall", false);
-export const actions:Action[] = [
-  cuboidAction,
-  hollowCuboidAction,
-  pyramidAction,
-  sphereAction,
-  hemisphereAction,
-  coneAction,
-  lineAction,
-  wallAction,
-  undo,
-  cancel,
-]
-
-export const actionMap = new Map<string, number>();
-for (let i = 0; i < actions.length; i++) {
-  actionMap.set(actions[i].name, i);
-}
+ 
