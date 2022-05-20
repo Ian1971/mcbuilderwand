@@ -56,6 +56,12 @@ function mainTick() {
 
         // logging.log(`about to show optionForm`);
         optionForm.show(msg.player).then(optionResponse => {
+
+          if (optionResponse.isCanceled){
+            playerWandStates.set(msg.player.name, new PlayerWandState());
+            return;
+          }
+
           msg.wandState.keep = optionResponse.formValues![0];
           msg.wandState.blockOpt = optionResponse.formValues![2];
           msg.wandState.direction = optionResponse.formValues![3] ;
@@ -113,7 +119,7 @@ async function useWand(args: ItemUseOnEvent) {
     wandState.firstBlock = clickedBlock;
     wandState.state = enums.WandState.SelectedBlock;
 
-    logging.log(`Selected block ${wandState.firstBlock} permuation:${JSON.stringify(wandState.firstBlock.permutation.getAllProperties())}`);
+    // logging.log(`Selected block ${wandState.firstBlock} permuation:${JSON.stringify(wandState.firstBlock.permutation.getAllProperties())}`);
 
     const actionChooseForm = new ActionFormData()
     .title("Action")
@@ -129,7 +135,12 @@ async function useWand(args: ItemUseOnEvent) {
     let response = await actionChooseForm.show(player);
 
     if(response){
-      logging.log(`you chose ${response.selection!}`);
+      if (response.isCanceled){
+        playerWandStates.set(player.name, new PlayerWandState());
+        return;
+      }
+
+      // logging.log(`you chose ${response.selection!}`);
 
       wandState.action = ActionList.actions[response.selection!] ;
       if (wandState.action === cancel) {
