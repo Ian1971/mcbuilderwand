@@ -1,10 +1,11 @@
 import { Action } from "./action";
 import { Sphere } from "./drawing/sphere";
 import { Cuboid } from "./drawing/cuboid";
+import { HollowCuboid } from "./drawing/hollow_cuboid";
 export const cancel = new Action("cancel");
 export const undo = new Action("undo");
 const cuboidAction = new Cuboid();
-const hollowCuboidAction = new Action("hollow cuboid");
+const hollowCuboidAction = new HollowCuboid();
 const pyramidAction = new Action("pyramid");
 const sphereAction = new Sphere();
 const hemisphereAction = new Action("hemisphere", false);

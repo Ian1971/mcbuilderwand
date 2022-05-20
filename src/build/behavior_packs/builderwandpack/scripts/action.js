@@ -18,7 +18,7 @@ export class PlayerWandState {
         this.action = null;
         this.keep = false;
         this.blockOpt = 0;
-        this.direction = 0;
+        this.direction = "x";
         this.above = false;
     }
     get replaceOrKeep() {

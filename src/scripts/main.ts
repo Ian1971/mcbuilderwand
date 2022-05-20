@@ -17,6 +17,7 @@ const playerWandStates = new Map<string, PlayerWandState>();
 const playerMessaging = new Map<string, PlayerMessage>();
 //undo buffer is a map from play to an array of blocks
 const undoMap = new Map<string, Array<UndoItem>>();
+const directions = ["x", "y", "z"];
 
 function mainTick() {
   tickIndex++;
@@ -64,13 +65,13 @@ function mainTick() {
 
           msg.wandState.keep = optionResponse.formValues![0];
           msg.wandState.blockOpt = optionResponse.formValues![2];
-          msg.wandState.direction = optionResponse.formValues![3] ;
+          msg.wandState.direction = directions[optionResponse.formValues![3]];
           msg.wandState.above = optionResponse.formValues![1] ;
 
-          logging.log(`above: ${optionResponse.formValues![1]}`);
-          logging.log(`blockOpt: ${optionResponse.formValues![2]}`);
-          logging.log(`direction: ${optionResponse.formValues![3]}`);
-          logging.log(`keep: ${optionResponse.formValues![0]}`);
+          // logging.log(`above: ${optionResponse.formValues![1]}`);
+          // logging.log(`blockOpt: ${optionResponse.formValues![2]}`);
+          // logging.log(`direction: ${optionResponse.formValues![3]}`);
+          // logging.log(`keep: ${optionResponse.formValues![0]}`);
           playerWandStates.set(msg.player.name, msg.wandState);
           //setup selected action
           msg.wandState.action.message(msg.wandState);
@@ -247,7 +248,7 @@ function draw(map:MapWithOffset,
 
     try {
       
-      logging.log(`inside map array command:${command} `);
+      // logging.log(`inside map array command:${command} `);
       let response = world.getDimension("overworld").runCommand(command);
     } catch (error) {
         //ignore errors for now

@@ -25,4 +25,5 @@ export class Cuboid extends Action {
         logging.log(`The second click is the opposite corner of the cuboid.`);
         logging.log(`Warning: There is NO undo for this action.`);
     }
+    
 }

@@ -22,7 +22,7 @@ export class PlayerWandState {
     action: Action;
     keep: boolean;
     blockOpt: number;
-    direction: number;
+    direction: string;
     above: boolean;
   
   
@@ -34,7 +34,7 @@ export class PlayerWandState {
       this.action = null!;
       this.keep = false;
       this.blockOpt = 0;
-      this.direction = 0;
+      this.direction = "x";
       this.above = false;
     }
 

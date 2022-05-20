@@ -25,7 +25,7 @@ export class MapWithOffset {
         this.offset = offset;
     }
 }
-function push_to_map_axis(map, item, used, axis) {
+export function push_to_map_axis(map, item, used, axis) {
     if (axis === "x") {
         var mapLocation = new BlockLocation(item.y, Math.round(item.x), Math.round(item.z));
         push_to_map(map, mapLocation, used);
@@ -41,4 +41,20 @@ function push_to_map_axis(map, item, used, axis) {
 }
 export function above(above, y) {
     return above ? y + 1 : y;
+}
+export function getWidthAndLengthWithAxis(vector, axis) {
+    let width;
+    let length = vector.y;
+    if (axis === "x") {
+        width = 2 * magnitude2d(vector.y, vector.z);
+        length = vector.x;
+    }
+    else if (axis === "z") {
+        width = 2 * magnitude2d(vector.y, vector.x);
+        length = vector.x;
+    }
+    else {
+        width = 2 * magnitude2d(vector.x, vector.z);
+    }
+    return { width: width, length: length };
 }
