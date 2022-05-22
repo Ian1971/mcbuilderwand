@@ -33,7 +33,7 @@ export class HollowCuboid extends Action {
     return cubeDraw(w,h,direction);
 }
 
- function pyramid(w:number, h:number,direction:string):MapWithOffset{
+export function pyramid(w:number, h:number,direction:string):MapWithOffset{
     return pyramidDraw(w,h,direction);
 
 }

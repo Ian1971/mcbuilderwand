@@ -22,7 +22,7 @@ function cuboid_hollow(w, h, direction) {
     // return {map:cubeDraw(w,h,direction), offset:{x:0,y:0,z:0}};
     return cubeDraw(w, h, direction);
 }
-function pyramid(w, h, direction) {
+export function pyramid(w, h, direction) {
     return pyramidDraw(w, h, direction);
 }
 function cubeDraw(w, h, direction) {

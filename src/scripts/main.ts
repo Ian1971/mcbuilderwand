@@ -52,7 +52,7 @@ function mainTick() {
         }
 
         if (msg.wandState.action.directionOpt){
-          optionForm.dropdown(`Direction`, ["x", "y", "z"], 0);
+          optionForm.dropdown(`Direction`, ["x", "y", "z"], 1);
         }
 
         // logging.log(`about to show optionForm`);
@@ -68,10 +68,6 @@ function mainTick() {
           msg.wandState.direction = directions[optionResponse.formValues![3]];
           msg.wandState.above = optionResponse.formValues![1] ;
 
-          // logging.log(`above: ${optionResponse.formValues![1]}`);
-          // logging.log(`blockOpt: ${optionResponse.formValues![2]}`);
-          // logging.log(`direction: ${optionResponse.formValues![3]}`);
-          // logging.log(`keep: ${optionResponse.formValues![0]}`);
           playerWandStates.set(msg.player.name, msg.wandState);
           //setup selected action
           msg.wandState.action.message(msg.wandState);
@@ -224,8 +220,7 @@ function draw(map:MapWithOffset,
 	let thisUndo = new Array<UndoItem>();
 	undoMap.set(player.id, thisUndo);
 
-	//let commands = new Array();
-    map.map.forEach(element => {
+  map.map.forEach(element => {
 		//log(element);
 		//get coords of block
 
@@ -242,8 +237,6 @@ function draw(map:MapWithOffset,
 		thisUndo.push(new UndoItem(currentBlock, blockState));
 
     //TODO: get variant from wandState.block.permutation
-    const replaceOrKeep = wandState.keep ? "keep" : "replace";
-
 		const command = `setblock ${x} ${y} ${z} ${wandState.firstBlock.id} ${variant} ${wandState.replaceOrKeep}`;
 
     try {
@@ -256,7 +249,7 @@ function draw(map:MapWithOffset,
     }
 
 
-    });
+  });
 
 }
 
