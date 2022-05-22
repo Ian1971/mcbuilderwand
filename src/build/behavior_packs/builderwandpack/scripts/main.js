@@ -179,11 +179,12 @@ function draw(map, player, variant, wandState) {
         //TODO: get variant from wandState.block.permutation
         const command = `setblock ${x} ${y} ${z} ${wandState.firstBlock.id} ${variant} ${wandState.replaceOrKeep}`;
         try {
-            // logging.log(`inside map array command:${command} `);
+            logging.log(`inside map array command:${command} `);
             let response = world.getDimension("overworld").runCommand(command);
         }
         catch (error) {
             //ignore errors for now
+            //usually it is that it can't place a block for some reason
             logging.log(`error:${JSON.stringify(error)}`);
         }
     });

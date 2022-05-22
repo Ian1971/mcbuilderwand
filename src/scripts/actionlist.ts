@@ -4,6 +4,10 @@ import { Cuboid } from "./drawing/cuboid";
 import { HollowCuboid } from "./drawing/hollow_cuboid";
 import { Pyramid } from "./drawing/pyramid";
 import { Hemisphere } from "./drawing/hemisphere";
+import { Cylinder } from "./drawing/cylinder";
+import { Cone } from "./drawing/cone";
+import { Line } from "./drawing/line";
+import { Wall } from "./drawing/wall";
  
 export const cancel:Action = new Action("cancel");
 export const undo:Action = new Action("undo");
@@ -12,15 +16,17 @@ const hollowCuboidAction:Action = new HollowCuboid();
 const pyramidAction:Action = new Pyramid();
 const sphereAction:Action = new Sphere();
 const hemisphereAction:Action = new Hemisphere();
-const coneAction:Action = new Action("cone");
-const lineAction:Action = new Action("line");
-const wallAction:Action = new Action("wall", false);
+const cylinderAction:Action = new Cylinder();
+const coneAction:Action = new Cone();
+const lineAction:Action = new Line();
+const wallAction:Action = new Wall();
 const actions:Action[] = new Array<Action>(
   cuboidAction,
   hollowCuboidAction,
   pyramidAction,
   sphereAction,
   hemisphereAction,
+  cylinderAction,
   coneAction,
   lineAction,
   wallAction,
