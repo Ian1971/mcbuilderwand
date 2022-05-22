@@ -102,6 +102,8 @@ function itemUseOn(args: ItemUseOnEvent) {
 
 async function useWand(args: ItemUseOnEvent) {
 
+  let player = <Player>args.source;
+
   // logging.log(`name ${args.source.nameTag}`);
 
   if (!playerWandStates.has(args.source.nameTag)){
@@ -127,7 +129,6 @@ async function useWand(args: ItemUseOnEvent) {
     }
 
     let showOptionForm = false;
-    let player = <Player>args.source;
 
     let response = await actionChooseForm.show(player);
 
@@ -145,7 +146,8 @@ async function useWand(args: ItemUseOnEvent) {
         return;
       }
       else if (wandState.action === undo) {
-        //TODO: handle undo
+        //handle undo separately for now. could move into an action class
+        UndoAction(player);
         transitionToInitial(player);
         return;
       }
@@ -175,9 +177,7 @@ async function useWand(args: ItemUseOnEvent) {
     wandState.state = enums.WandState.SelectedSecondPosition;
 
     logging.log(`SelectedSecondPosition ${wandState.secondPosition}`);
-
-    // logging.log(`GO ${JSON.stringify(wandState)}`);
-
+    
     let map = wandState.action.execute(wandState); //slightly odd syntax but sort later
 
     //if we got a map draw it.
@@ -232,9 +232,10 @@ function draw(map:MapWithOffset,
 		//get the block and record it in the players undo
 		let currentBlock = world.getDimension("overworld").getBlock(pos);
     let blockState = currentBlock.getComponent("minecraft:blockstate");
-    
 
-		thisUndo.push(new UndoItem(currentBlock, blockState));
+    const undoBlock = new BasicBlock(currentBlock.id, currentBlock.location);
+
+		thisUndo.push(new UndoItem(undoBlock, blockState));
 
     //TODO: get variant from wandState.block.permutation
 		const command = `setblock ${x} ${y} ${z} ${wandState.firstBlock.id} ${variant} ${wandState.replaceOrKeep}`;
@@ -254,13 +255,52 @@ function draw(map:MapWithOffset,
 
 }
 
+//TODO: move block state info in here too
 class UndoItem {
-  block: Block;
+  block: BasicBlock;
   blockState: any;
 
-  constructor(block: Block, blockState: any) {
+  constructor(block: BasicBlock, blockState: any) {
     this.block = block;
     this.blockState = blockState;
   }
 }
 
+//used for getting block details but not retaining an actual block instance (which may change)
+class BasicBlock {
+  id: string;
+  location: BlockLocation;
+
+  constructor(id: string, location:BlockLocation){
+    this.id = id;
+    this.location = location;
+  }
+}
+
+function UndoAction(player:Player) 
+{
+	let undoBuffer = undoMap.get(player.id);
+
+	if (!undoBuffer)
+		return;
+
+	undoBuffer.forEach(element => {
+		//log(element);
+		//get coords of block
+		const x:number = element.block.location.x;
+		const y:number = element.block.location.y;
+		const z:number = element.block.location.z;
+
+		const command:string = "setblock " + x + " " + y + " " + z + " " + element.block.id + " 1 replace";
+
+    try {
+      logging.log(`inside undo command:${command} `);
+      let response = world.getDimension("overworld").runCommand(command);
+    } catch (error) {
+        //ignore errors for now
+        //usually it is that it can't place a block for some reason
+        logging.log(`undo error:${JSON.stringify(error)}`);
+    }
+
+	});
+}

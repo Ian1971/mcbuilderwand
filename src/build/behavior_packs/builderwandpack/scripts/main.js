@@ -78,6 +78,7 @@ function itemUseOn(args) {
     }
 }
 async function useWand(args) {
+    let player = args.source;
     // logging.log(`name ${args.source.nameTag}`);
     if (!playerWandStates.has(args.source.nameTag)) {
         logging.log(`No wandstate for ${args.source.nameTag}`);
@@ -96,7 +97,6 @@ async function useWand(args) {
             actionChooseForm.button(ActionList.actions[i].name);
         }
         let showOptionForm = false;
-        let player = args.source;
         let response = await actionChooseForm.show(player);
         if (response) {
             if (response.isCanceled) {
@@ -110,7 +110,8 @@ async function useWand(args) {
                 return;
             }
             else if (wandState.action === undo) {
-                //TODO: handle undo
+                //handle undo separately for now. could move into an action class
+                UndoAction(player);
                 transitionToInitial(player);
                 return;
             }
@@ -135,7 +136,6 @@ async function useWand(args) {
         wandState.secondPosition = args.blockLocation;
         wandState.state = enums.WandState.SelectedSecondPosition;
         logging.log(`SelectedSecondPosition ${wandState.secondPosition}`);
-        // logging.log(`GO ${JSON.stringify(wandState)}`);
         let map = wandState.action.execute(wandState); //slightly odd syntax but sort later
         //if we got a map draw it.
         //if we didn't get a map then the action may have used some other commands
@@ -175,7 +175,8 @@ function draw(map, player, variant, wandState) {
         //get the block and record it in the players undo
         let currentBlock = world.getDimension("overworld").getBlock(pos);
         let blockState = currentBlock.getComponent("minecraft:blockstate");
-        thisUndo.push(new UndoItem(currentBlock, blockState));
+        const undoBlock = new BasicBlock(currentBlock.id, currentBlock.location);
+        thisUndo.push(new UndoItem(undoBlock, blockState));
         //TODO: get variant from wandState.block.permutation
         const command = `setblock ${x} ${y} ${z} ${wandState.firstBlock.id} ${variant} ${wandState.replaceOrKeep}`;
         try {
@@ -189,9 +190,39 @@ function draw(map, player, variant, wandState) {
         }
     });
 }
+//TODO: move block state info in here too
 class UndoItem {
     constructor(block, blockState) {
         this.block = block;
         this.blockState = blockState;
     }
+}
+//used for getting block details but not retaining an actual block instance (which may change)
+class BasicBlock {
+    constructor(id, location) {
+        this.id = id;
+        this.location = location;
+    }
+}
+function UndoAction(player) {
+    let undoBuffer = undoMap.get(player.id);
+    if (!undoBuffer)
+        return;
+    undoBuffer.forEach(element => {
+        //log(element);
+        //get coords of block
+        const x = element.block.location.x;
+        const y = element.block.location.y;
+        const z = element.block.location.z;
+        const command = "setblock " + x + " " + y + " " + z + " " + element.block.id + " 1 replace";
+        try {
+            logging.log(`inside undo command:${command} `);
+            let response = world.getDimension("overworld").runCommand(command);
+        }
+        catch (error) {
+            //ignore errors for now
+            //usually it is that it can't place a block for some reason
+            logging.log(`undo error:${JSON.stringify(error)}`);
+        }
+    });
 }
