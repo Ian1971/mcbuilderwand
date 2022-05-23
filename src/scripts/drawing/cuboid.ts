@@ -1,8 +1,7 @@
-import { BlockLocation, Player, world } from "mojang-minecraft";
-import {above} from "./vector";
+import { Block, BlockLocation, Player, world } from "mojang-minecraft";
 import {Action, PlayerWandState} from "./../action"
 import * as logging from "./../logging"
-import { MapWithOffset} from "./vector";
+import { MapWithOffset, push_to_map} from "./vector";
 
 export class Cuboid extends Action {
 
@@ -13,17 +12,39 @@ export class Cuboid extends Action {
     
     execute(wandState: PlayerWandState):MapWithOffset | null 
     {
-        //TODO: variants for fill
-        const command = "fill " + Math.floor(wandState.firstPosition.x) + " " + Math.floor(above(wandState.above, wandState.firstPosition.y)) + " " + Math.floor(wandState.firstPosition.z) + " " + Math.floor(wandState.secondPosition.x) + " " + Math.floor(above(wandState.above, wandState.secondPosition.y)) + " " + Math.floor(wandState.secondPosition.z) + " " + wandState.firstBlock.id + " 0 " + wandState.replaceOrKeep;
-        world.getDimension("overworld").runCommand(command);
-        return null;
+        var map = fillMap(wandState.firstPosition, wandState.secondPosition);
+        return map;
     }
 
     message(wandState: PlayerWandState){
         logging.log(`You have chosen to create a filled cuboid using ${wandState.firstBlock.id}`);
         logging.log(`The first click one corner of the cuboid.`);
         logging.log(`The second click is the opposite corner of the cuboid.`);
-        logging.log(`Warning: There is NO undo for this action.`);
     }
     
+}
+
+
+function fillMap(from:BlockLocation, to:BlockLocation) : MapWithOffset
+{
+    let map = new Array<BlockLocation>();
+    
+    let used:Map<string, boolean> = new Map<string, boolean>();
+    
+    let minX = Math.min(from.x, to.x);
+    let maxX = Math.max(from.x, to.x);
+    let minY = Math.min(from.y, to.y);
+    let maxY = Math.max(from.y, to.y);
+    let minZ = Math.min(from.z, to.z);
+    let maxZ = Math.max(from.z, to.z);
+
+    for (let i = minX; i <= maxX; i++) {
+        for (let j = minY; j <= maxY; j++) {
+        for (let k = minZ; k <= maxZ; k++) {
+            push_to_map(map, new BlockLocation(i,j,k), used);
+        }
+        }
+    }
+
+    return new MapWithOffset(map, new BlockLocation(from.x,from.y,from.z));
 }

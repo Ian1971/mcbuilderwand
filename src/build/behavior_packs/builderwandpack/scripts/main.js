@@ -61,6 +61,7 @@ function mainTick() {
         }
     });
 }
+//clicks in the air
 function itemUse(args) {
     //this event will be for right click with the wand when not close enough to a block
     //it will be useful for placing blocks in the air
@@ -76,6 +77,7 @@ function itemUse(args) {
         useWand(args.source, new BlockLocation(args.source.location.x, args.source.location.y - 1, args.source.location.z));
     }
 }
+//clicks on a block
 function itemUseOn(args) {
     //this may be hit many times per click so ensure we handle it just once
     let tickSince = tickIndex - lastActionTick;
@@ -156,8 +158,7 @@ async function useWand(source, blockLocation) {
         //if we got a map draw it.
         //if we didn't get a map then the action may have used some other commands
         if (map) {
-            let variant = 0;
-            draw(map, source, variant, wandState);
+            draw(map, source, wandState);
         }
         transitionToInitial(source);
     }
@@ -178,10 +179,11 @@ world.events.playerJoin.subscribe(playerJoin);
 world.events.playerLeave.subscribe(playerLeave);
 world.events.itemUseOn.subscribe(itemUseOn);
 world.events.itemUse.subscribe(itemUse);
-function draw(map, player, variant, wandState) {
+function draw(map, player, wandState) {
     //create undo buffer for this action
     let thisUndo = new Array();
     undoMap.set(player.id, thisUndo);
+    logging.log(`map size ${map.map.length}`);
     map.map.forEach(element => {
         //log(element);
         //get coords of block
@@ -189,6 +191,7 @@ function draw(map, player, variant, wandState) {
         const y = Math.floor(wandState.firstPosition.y + element.y - map.offset.y);
         const z = Math.floor(wandState.firstPosition.z + element.z - map.offset.z);
         const pos = new BlockLocation(x, y, z);
+        logging.log(`x ${x} y ${y} z ${z}`);
         //get the block and record it in the players undo
         let currentBlock = player.dimension.getBlock(pos);
         const undoBlock = new BasicBlock(currentBlock.type, currentBlock.location, currentBlock.permutation);

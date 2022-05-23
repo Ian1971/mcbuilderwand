@@ -80,6 +80,7 @@ function mainTick() {
   
 }
 
+//clicks in the air
 function itemUse(args: ItemUseEvent) {
   //this event will be for right click with the wand when not close enough to a block
   //it will be useful for placing blocks in the air
@@ -99,6 +100,7 @@ function itemUse(args: ItemUseEvent) {
   }
 }
 
+//clicks on a block
 function itemUseOn(args: ItemUseOnEvent) {
 
   //this may be hit many times per click so ensure we handle it just once
@@ -203,8 +205,7 @@ async function useWand(source:Entity, blockLocation:BlockLocation) {
     //if we got a map draw it.
     //if we didn't get a map then the action may have used some other commands
     if (map){
-      let variant = 0;
-      draw(map, source, variant, wandState);
+      draw(map, source, wandState);
   
     }
 
@@ -234,12 +235,13 @@ world.events.itemUse.subscribe(itemUse);
 
 function draw(map:MapWithOffset, 
   player:Entity, 
-  variant:number,
   wandState: PlayerWandState) {
 
 	//create undo buffer for this action
 	let thisUndo = new Array<UndoItem>();
 	undoMap.set(player.id, thisUndo);
+
+  logging.log(`map size ${map.map.length}`)
 
   map.map.forEach(element => {
 		//log(element);
@@ -250,6 +252,7 @@ function draw(map:MapWithOffset,
 		const z = Math.floor(wandState.firstPosition.z + element.z - map.offset.z);
 		const pos = new BlockLocation(x,y,z);
 
+    logging.log(`x ${x} y ${y} z ${z}`)
 		//get the block and record it in the players undo
     
 		let currentBlock = player.dimension.getBlock(pos);

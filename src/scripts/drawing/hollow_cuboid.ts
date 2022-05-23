@@ -39,7 +39,7 @@ export function pyramid(w:number, h:number,direction:string):MapWithOffset{
 }
 
 function cubeDraw(w:number, h:number,direction:string):MapWithOffset {
-    let map = new Array();
+    let map = new Array<BlockLocation>();
     let used:Map<string, boolean> = new Map<string, boolean>();
 
     //if negative height then they went down. Remember that for later but flip sign of h
