@@ -22,7 +22,6 @@ export function push_to_map(map: Array<BlockLocation>, item:BlockLocation, used:
 
     if (used.get(posid))
     {
-        logging.log(` used ${posid}`);
         return;
     }
 

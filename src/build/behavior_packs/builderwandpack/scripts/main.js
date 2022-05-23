@@ -4,7 +4,6 @@ import * as logging from "./logging";
 import * as enums from "./enums";
 import { PlayerMessage, PlayerWandState } from "./action";
 import { ActionList, cancel, undo } from "./actionlist";
-//TODO: use other dimensions - currently just overworld
 //TODO: give option of using current player position when click or the clicked block
 const builderWanderId = "dabby:builder_wand";
 const coolDown = 5; //ticks to wait before processing another input
@@ -15,7 +14,6 @@ const playerMessaging = new Map();
 //undo buffer is a map from play to an array of blocks
 const undoMap = new Map();
 const directions = ["x", "y", "z"];
-const overworld = world.getDimension("overworld");
 function mainTick() {
     tickIndex++;
     // if (tickIndex % 10 === 0) {
@@ -32,7 +30,6 @@ function mainTick() {
             if (msg.dialog === enums.Dialog.OptionChoose) {
                 //some action is chosen so show the options for it
                 //TODO: modal form doesn't look great currently but will do for now
-                //TODO: option to choose the block above the one clicked
                 const optionForm = new ModalFormData()
                     .title("Choose options");
                 optionForm.icon;
@@ -87,7 +84,7 @@ async function useWand(args) {
     }
     let wandState = playerWandStates.get(args.source.nameTag) ?? new PlayerWandState();
     if (wandState.state === enums.WandState.Initial) {
-        const clickedBlock = world.getDimension("overworld").getBlock(args.blockLocation);
+        const clickedBlock = player.dimension.getBlock(args.blockLocation);
         wandState.firstBlock = clickedBlock;
         wandState.state = enums.WandState.SelectedBlock;
         let blockState = wandState.firstBlock.getComponent("minecraft:blockstate");
@@ -177,14 +174,14 @@ function draw(map, player, variant, wandState) {
         const z = Math.floor(wandState.firstPosition.z + element.z - map.offset.z);
         const pos = new BlockLocation(x, y, z);
         //get the block and record it in the players undo
-        let currentBlock = world.getDimension("overworld").getBlock(pos);
+        let currentBlock = player.dimension.getBlock(pos);
         let blockState = currentBlock.getComponent("minecraft:blockstate");
         const undoBlock = new BasicBlock(currentBlock.type, currentBlock.location, currentBlock.permutation);
         thisUndo.push(new UndoItem(undoBlock, blockState));
         //TODO: get variant from wandState.block.permutation
         // const command = `setblock ${x} ${y} ${z} ${wandState.firstBlock.id} ${variant} ${wandState.replaceOrKeep}`;
         // try {
-        const block = overworld.getBlock(pos);
+        const block = player.dimension.getBlock(pos);
         block.setType(wandState.firstBlock.type);
         block.setPermutation(wandState.firstBlock.permutation);
         // logging.log(`inside map array command:${command} `);
@@ -221,17 +218,8 @@ function UndoAction(player) {
         const x = element.block.location.x;
         const y = element.block.location.y;
         const z = element.block.location.z;
-        // const command:string = "setblock " + x + " " + y + " " + z + " " + element.block.id + " 1 replace";
-        const block = overworld.getBlock(element.block.location);
+        const block = player.dimension.getBlock(element.block.location);
         block.setType(element.block.type);
         block.setPermutation(element.block.permutation);
-        // try {
-        //   logging.log(`inside undo command:${command} `);
-        //   let response = world.getDimension("overworld").runCommand(command);
-        // } catch (error) {
-        //     //ignore errors for now
-        //     //usually it is that it can't place a block for some reason
-        //     logging.log(`undo error:${JSON.stringify(error)}`);
-        // }
     });
 }

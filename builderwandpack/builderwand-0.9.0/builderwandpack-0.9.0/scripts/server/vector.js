@@ -19,7 +19,7 @@ push_to_map = function(map, item, used) {
 
     if (used[posid])
     {
-        log("used", posid);
+        // log("used", posid);
         return;
     }
 
