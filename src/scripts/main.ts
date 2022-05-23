@@ -1,4 +1,4 @@
-import { world, Block, ItemStack, Entity, ItemUseEvent, BlockBreakEvent, PlayerJoinEvent, PlayerLeaveEvent, ItemUseOnEvent, BlockLocation, Player } from "mojang-minecraft";
+import { world, Block, BlockType, Entity, ItemUseEvent, BlockProperties, PlayerJoinEvent, PlayerLeaveEvent, ItemUseOnEvent, BlockLocation, Player, StringBlockProperty, BlockPermutation } from "mojang-minecraft";
 import {MessageFormData, ActionFormData, ModalFormData} from "mojang-minecraft-ui"
 import * as logging from "./logging";
 import * as enums from "./enums"
@@ -18,6 +18,7 @@ const playerMessaging = new Map<string, PlayerMessage>();
 //undo buffer is a map from play to an array of blocks
 const undoMap = new Map<string, Array<UndoItem>>();
 const directions = ["x", "y", "z"];
+const overworld = world.getDimension("overworld");
 
 function mainTick() {
   tickIndex++;
@@ -118,7 +119,13 @@ async function useWand(args: ItemUseOnEvent) {
     wandState.firstBlock = clickedBlock;
     wandState.state = enums.WandState.SelectedBlock;
 
-    // logging.log(`Selected block ${wandState.firstBlock} permuation:${JSON.stringify(wandState.firstBlock.permutation.getAllProperties())}`);
+    
+    let blockState = wandState.firstBlock.getComponent("minecraft:blockstate");
+
+    logging.log(`Selected block ${wandState.firstBlock} permutation:${JSON.stringify(wandState.firstBlock.type)}`);
+
+    wandState.firstBlock.permutation.getAllProperties().forEach(p => logging.log(`prop ${p.name} = ${(<StringBlockProperty>wandState.firstBlock.permutation.getProperty(p.name)).value}`));
+    // wandState.firstBlock.permutation.getTags().forEach(p => logging.log(`tag ${p}`));
 
     const actionChooseForm = new ActionFormData()
     .title("Action")
@@ -233,22 +240,26 @@ function draw(map:MapWithOffset,
 		let currentBlock = world.getDimension("overworld").getBlock(pos);
     let blockState = currentBlock.getComponent("minecraft:blockstate");
 
-    const undoBlock = new BasicBlock(currentBlock.id, currentBlock.location);
+    const undoBlock = new BasicBlock(currentBlock.type, currentBlock.location, currentBlock.permutation);
 
 		thisUndo.push(new UndoItem(undoBlock, blockState));
 
     //TODO: get variant from wandState.block.permutation
-		const command = `setblock ${x} ${y} ${z} ${wandState.firstBlock.id} ${variant} ${wandState.replaceOrKeep}`;
+		// const command = `setblock ${x} ${y} ${z} ${wandState.firstBlock.id} ${variant} ${wandState.replaceOrKeep}`;
 
-    try {
+    // try {
       
-      logging.log(`inside map array command:${command} `);
-      let response = world.getDimension("overworld").runCommand(command);
-    } catch (error) {
-        //ignore errors for now
-        //usually it is that it can't place a block for some reason
-        logging.log(`error:${JSON.stringify(error)}`);
-    }
+      const block = overworld.getBlock(pos);
+      block.setType(wandState.firstBlock.type);
+      block.setPermutation(wandState.firstBlock.permutation);
+
+      // logging.log(`inside map array command:${command} `);
+      // let response = world.getDimension("overworld").runCommand(command);
+    // } catch (error) {
+    //     //ignore errors for now
+    //     //usually it is that it can't place a block for some reason
+    //     logging.log(`error:${JSON.stringify(error)}`);
+    // }
 
 
   });
@@ -268,12 +279,14 @@ class UndoItem {
 
 //used for getting block details but not retaining an actual block instance (which may change)
 class BasicBlock {
-  id: string;
+  type: BlockType;
   location: BlockLocation;
+  permutation: BlockPermutation;
 
-  constructor(id: string, location:BlockLocation){
-    this.id = id;
+  constructor(type: BlockType, location:BlockLocation, permutation:BlockPermutation){
+    this.type = type;
     this.location = location;
+    this.permutation = permutation;
   }
 }
 
@@ -291,16 +304,22 @@ function UndoAction(player:Player)
 		const y:number = element.block.location.y;
 		const z:number = element.block.location.z;
 
-		const command:string = "setblock " + x + " " + y + " " + z + " " + element.block.id + " 1 replace";
+		// const command:string = "setblock " + x + " " + y + " " + z + " " + element.block.id + " 1 replace";
 
-    try {
-      logging.log(`inside undo command:${command} `);
-      let response = world.getDimension("overworld").runCommand(command);
-    } catch (error) {
-        //ignore errors for now
-        //usually it is that it can't place a block for some reason
-        logging.log(`undo error:${JSON.stringify(error)}`);
-    }
+          
+    const block = overworld.getBlock(element.block.location);
+    block.setType(element.block.type);
+    block.setPermutation(element.block.permutation);
+
+    // try {
+    //   logging.log(`inside undo command:${command} `);
+
+    //   let response = world.getDimension("overworld").runCommand(command);
+    // } catch (error) {
+    //     //ignore errors for now
+    //     //usually it is that it can't place a block for some reason
+    //     logging.log(`undo error:${JSON.stringify(error)}`);
+    // }
 
 	});
 }
