@@ -1,6 +1,5 @@
 # mcbuilderwand #
 
-# NOTE THIS CURRENTLY DOES NOT WORK WITH THE LATEST VERSION OF BEDROCK DUE TO REMOVAL OF EXPERIMENTAL MODDING #
 Wand that allows buidling geometric shapes in bedrock minecraft
 
 Hopefully it is self-explanatory. 
