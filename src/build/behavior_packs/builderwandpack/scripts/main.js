@@ -191,7 +191,7 @@ function draw(map, player, wandState) {
         const y = Math.floor(wandState.firstPosition.y + element.y - map.offset.y);
         const z = Math.floor(wandState.firstPosition.z + element.z - map.offset.z);
         const pos = new BlockLocation(x, y, z);
-        logging.log(`x ${x} y ${y} z ${z}`);
+        // logging.log(`x ${x} y ${y} z ${z}`)
         //get the block and record it in the players undo
         let currentBlock = player.dimension.getBlock(pos);
         const undoBlock = new BasicBlock(currentBlock.type, currentBlock.location, currentBlock.permutation);
