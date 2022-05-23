@@ -61,6 +61,21 @@ function mainTick() {
         }
     });
 }
+function itemUse(args) {
+    //this event will be for right click with the wand when not close enough to a block
+    //it will be useful for placing blocks in the air
+    //it will choose the block immediately below the player
+    //cooldown
+    let tickSince = tickIndex - lastActionTick;
+    if (lastActionTick > -1 && (tickSince < coolDown)) {
+        // logging.log(`cooldown lastActionTick:${lastActionTick}, tickIndex:${tickIndex}`);
+        return;
+    }
+    lastActionTick = tickIndex;
+    if (args.item.id === builderWanderId) {
+        useWand(args.source, new BlockLocation(args.source.location.x, args.source.location.y - 1, args.source.location.z));
+    }
+}
 function itemUseOn(args) {
     //this may be hit many times per click so ensure we handle it just once
     let tickSince = tickIndex - lastActionTick;
@@ -69,27 +84,27 @@ function itemUseOn(args) {
         return;
     }
     lastActionTick = tickIndex;
-    logging.log(`itemUseOn ${args.item.id} lastActionTick:${lastActionTick}, tickIndex:${tickIndex}`);
+    // logging.log(`itemUseOn ${args.item.id} lastActionTick:${lastActionTick}, tickIndex:${tickIndex}`);
     //some player has used the wand
     if (args.item.id === builderWanderId) {
-        useWand(args);
+        useWand(args.source, args.blockLocation);
     }
 }
-async function useWand(args) {
-    let player = args.source;
+//use the wand. If location is null then they must have clicked not direct on to a block so use the player location
+async function useWand(source, blockLocation) {
+    let player = source;
     // logging.log(`name ${args.source.nameTag}`);
-    if (!playerWandStates.has(args.source.nameTag)) {
-        logging.log(`No wandstate for ${args.source.nameTag}`);
+    if (!playerWandStates.has(source.nameTag)) {
+        logging.log(`No wandstate for ${source.nameTag}`);
         return;
     }
-    let wandState = playerWandStates.get(args.source.nameTag) ?? new PlayerWandState();
+    let wandState = playerWandStates.get(source.nameTag) ?? new PlayerWandState();
     if (wandState.state === enums.WandState.Initial) {
-        const clickedBlock = player.dimension.getBlock(args.blockLocation);
+        const clickedBlock = player.dimension.getBlock(blockLocation);
         wandState.firstBlock = clickedBlock;
         wandState.state = enums.WandState.SelectedBlock;
-        let blockState = wandState.firstBlock.getComponent("minecraft:blockstate");
-        logging.log(`Selected block ${wandState.firstBlock} permutation:${JSON.stringify(wandState.firstBlock.type)}`);
-        wandState.firstBlock.permutation.getAllProperties().forEach(p => logging.log(`prop ${p.name} = ${wandState.firstBlock.permutation.getProperty(p.name).value}`));
+        // logging.log(`Selected block ${wandState.firstBlock} permutation:${JSON.stringify(wandState.firstBlock.type)}`);
+        // wandState.firstBlock.permutation.getAllProperties().forEach(p => logging.log(`prop ${p.name} = ${(<StringBlockProperty>wandState.firstBlock.permutation.getProperty(p.name)).value}`));
         // wandState.firstBlock.permutation.getTags().forEach(p => logging.log(`tag ${p}`));
         const actionChooseForm = new ActionFormData()
             .title("Action")
@@ -129,12 +144,12 @@ async function useWand(args) {
     }
     //set block position
     if (wandState.state === enums.WandState.SelectedBlock) {
-        wandState.firstPosition = args.blockLocation;
+        wandState.firstPosition = blockLocation;
         wandState.state = enums.WandState.SelectedFirstPosition;
         logging.log(`SelectedFirstPosition ${wandState.firstPosition}`);
     }
     else if (wandState.state === enums.WandState.SelectedFirstPosition) {
-        wandState.secondPosition = args.blockLocation;
+        wandState.secondPosition = blockLocation;
         wandState.state = enums.WandState.SelectedSecondPosition;
         logging.log(`SelectedSecondPosition ${wandState.secondPosition}`);
         let map = wandState.action.execute(wandState); //slightly odd syntax but sort later
@@ -142,9 +157,9 @@ async function useWand(args) {
         //if we didn't get a map then the action may have used some other commands
         if (map) {
             let variant = 0;
-            draw(map, args.source, variant, wandState);
+            draw(map, source, variant, wandState);
         }
-        transitionToInitial(args.source);
+        transitionToInitial(source);
     }
 }
 function playerJoin(args) {
@@ -162,6 +177,7 @@ world.events.tick.subscribe(mainTick);
 world.events.playerJoin.subscribe(playerJoin);
 world.events.playerLeave.subscribe(playerLeave);
 world.events.itemUseOn.subscribe(itemUseOn);
+world.events.itemUse.subscribe(itemUse);
 function draw(map, player, variant, wandState) {
     //create undo buffer for this action
     let thisUndo = new Array();
@@ -178,19 +194,9 @@ function draw(map, player, variant, wandState) {
         let blockState = currentBlock.getComponent("minecraft:blockstate");
         const undoBlock = new BasicBlock(currentBlock.type, currentBlock.location, currentBlock.permutation);
         thisUndo.push(new UndoItem(undoBlock, blockState));
-        //TODO: get variant from wandState.block.permutation
-        // const command = `setblock ${x} ${y} ${z} ${wandState.firstBlock.id} ${variant} ${wandState.replaceOrKeep}`;
-        // try {
         const block = player.dimension.getBlock(pos);
         block.setType(wandState.firstBlock.type);
         block.setPermutation(wandState.firstBlock.permutation);
-        // logging.log(`inside map array command:${command} `);
-        // let response = world.getDimension("overworld").runCommand(command);
-        // } catch (error) {
-        //     //ignore errors for now
-        //     //usually it is that it can't place a block for some reason
-        //     logging.log(`error:${JSON.stringify(error)}`);
-        // }
     });
 }
 //TODO: move block state info in here too
@@ -213,11 +219,6 @@ function UndoAction(player) {
     if (!undoBuffer)
         return;
     undoBuffer.forEach(element => {
-        //log(element);
-        //get coords of block
-        const x = element.block.location.x;
-        const y = element.block.location.y;
-        const z = element.block.location.z;
         const block = player.dimension.getBlock(element.block.location);
         block.setType(element.block.type);
         block.setPermutation(element.block.permutation);
