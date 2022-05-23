@@ -183,7 +183,7 @@ function draw(map, player, wandState) {
     //create undo buffer for this action
     let thisUndo = new Array();
     undoMap.set(player.id, thisUndo);
-    logging.log(`map size ${map.map.length}`);
+    // logging.log(`map size ${map.map.length}`)
     map.map.forEach(element => {
         //log(element);
         //get coords of block

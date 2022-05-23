@@ -241,7 +241,7 @@ function draw(map:MapWithOffset,
 	let thisUndo = new Array<UndoItem>();
 	undoMap.set(player.id, thisUndo);
 
-  logging.log(`map size ${map.map.length}`)
+  // logging.log(`map size ${map.map.length}`)
 
   map.map.forEach(element => {
 		//log(element);
