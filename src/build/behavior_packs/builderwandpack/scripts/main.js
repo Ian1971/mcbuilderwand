@@ -1,4 +1,4 @@
-import { world, BlockLocation } from "mojang-minecraft";
+import { world, MinecraftBlockTypes, BlockLocation } from "mojang-minecraft";
 import { ActionFormData, ModalFormData } from "mojang-minecraft-ui";
 import * as logging from "./logging";
 import * as enums from "./enums";
@@ -191,19 +191,28 @@ function draw(map, player, variant, wandState) {
         const pos = new BlockLocation(x, y, z);
         //get the block and record it in the players undo
         let currentBlock = player.dimension.getBlock(pos);
-        let blockState = currentBlock.getComponent("minecraft:blockstate");
         const undoBlock = new BasicBlock(currentBlock.type, currentBlock.location, currentBlock.permutation);
-        thisUndo.push(new UndoItem(undoBlock, blockState));
+        thisUndo.push(new UndoItem(undoBlock));
         const block = player.dimension.getBlock(pos);
-        block.setType(wandState.firstBlock.type);
-        block.setPermutation(wandState.firstBlock.permutation);
+        if (wandState.blockOpt == 0) {
+            block.setType(wandState.firstBlock.type);
+            block.setPermutation(wandState.firstBlock.permutation);
+        }
+        else if (wandState.blockOpt == 1) {
+            block.setType(MinecraftBlockTypes.air);
+        }
+        else if (wandState.blockOpt == 2) {
+            block.setType(MinecraftBlockTypes.water);
+        }
+        else if (wandState.blockOpt == 3) {
+            block.setType(MinecraftBlockTypes.lava);
+        }
     });
 }
 //TODO: move block state info in here too
 class UndoItem {
-    constructor(block, blockState) {
+    constructor(block) {
         this.block = block;
-        this.blockState = blockState;
     }
 }
 //used for getting block details but not retaining an actual block instance (which may change)

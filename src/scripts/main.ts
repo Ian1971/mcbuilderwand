@@ -1,4 +1,4 @@
-import { world, Block, BlockType, Entity, ItemUseEvent, BlockProperties, PlayerJoinEvent, PlayerLeaveEvent, ItemUseOnEvent, BlockLocation, Player, StringBlockProperty, BlockPermutation } from "mojang-minecraft";
+import { world, Block, BlockType, Entity, ItemUseEvent, MinecraftBlockTypes, PlayerJoinEvent, PlayerLeaveEvent, ItemUseOnEvent, BlockLocation, Player, StringBlockProperty, BlockPermutation } from "mojang-minecraft";
 import {MessageFormData, ActionFormData, ModalFormData} from "mojang-minecraft-ui"
 import * as logging from "./logging";
 import * as enums from "./enums"
@@ -253,15 +253,27 @@ function draw(map:MapWithOffset,
 		//get the block and record it in the players undo
     
 		let currentBlock = player.dimension.getBlock(pos);
-    let blockState = currentBlock.getComponent("minecraft:blockstate");
 
     const undoBlock = new BasicBlock(currentBlock.type, currentBlock.location, currentBlock.permutation);
 
-		thisUndo.push(new UndoItem(undoBlock, blockState));
+		thisUndo.push(new UndoItem(undoBlock));
 
     const block = player.dimension.getBlock(pos);
-    block.setType(wandState.firstBlock.type);
-    block.setPermutation(wandState.firstBlock.permutation);
+
+    if (wandState.blockOpt == 0){
+      block.setType(wandState.firstBlock.type);
+      block.setPermutation(wandState.firstBlock.permutation);
+    }
+    else if (wandState.blockOpt == 1) {
+      block.setType(MinecraftBlockTypes.air);
+    }
+    else if (wandState.blockOpt == 2) {
+      block.setType(MinecraftBlockTypes.water);
+    }
+    else if (wandState.blockOpt == 3) {
+      block.setType(MinecraftBlockTypes.lava);
+    }
+
 
   });
 
@@ -270,11 +282,9 @@ function draw(map:MapWithOffset,
 //TODO: move block state info in here too
 class UndoItem {
   block: BasicBlock;
-  blockState: any;
 
-  constructor(block: BasicBlock, blockState: any) {
+  constructor(block: BasicBlock) {
     this.block = block;
-    this.blockState = blockState;
   }
 }
 
