@@ -4,7 +4,7 @@
         "description": "Builder wand pack 1.0",
         "name": "Builder wand pack",
         "uuid": "d7d9205c-a64b-4335-aa1b-8dbb55c1fd78",
-        "version": [ 1, 0, 0 ],
+        "version": [ 1, 0, 1 ],
         "min_engine_version": [ 1, 16, 200 ]
     },
     "modules": [
@@ -12,11 +12,12 @@
             "description": "Builder wand pack",
             "type": "data",
             "uuid": "92b41d51-6aef-427f-ab3c-44d2da19f1a9",
-            "version": [1, 0, 0]
+            "version": [1, 0, 1]
         },
         {
             "description": "Script resources",
-            "type": "javascript",
+            "type": "script",
+            "language": "javascript",
             "uuid": "7c7e693f-99f4-41a9-95e0-1f57b37e1e12",
             "version": [0, 0, 1],
             "entry": "scripts/main.js"

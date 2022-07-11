@@ -1,0 +1,18 @@
+{
+    "format_version": 2,
+    "header": {
+        "description": "Builder wand resource pack 1.0",
+        "name": "Builder wand pack",
+        "uuid": "a7e165f0-a812-441e-a2bd-2fcf95a6cef7",
+        "version": [1, 0, 0],
+        "min_engine_version": [ 1, 16, 200 ]
+    },
+    "modules": [
+        {
+            "description": "Builder wand resource pack",
+            "type": "resources",
+            "uuid": "02b4b25d-e19b-4676-8516-29f864ab7661",
+            "version": [1, 0, 0]
+        }
+    ]
+}
