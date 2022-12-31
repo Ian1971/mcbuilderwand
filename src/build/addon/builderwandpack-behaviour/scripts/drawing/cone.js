@@ -13,7 +13,7 @@ export class Cone extends Action {
         return map;
     }
     message(wandState) {
-        logging.log(`You have chosen to create a cone using ${wandState.firstBlock.id}`);
+        logging.log(`You have chosen to create a cone using ${wandState.firstBlock.typeId}`);
         logging.log(`The first click is the center of the base circle of the cone.`);
         logging.log(`The second click is the radius and height of the cone.`);
     }

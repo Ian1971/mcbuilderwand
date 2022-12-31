@@ -1,4 +1,4 @@
-import { BlockLocation } from "mojang-minecraft";
+import { BlockLocation } from "@minecraft/server";
 import { Action } from "./../action";
 import * as logging from "./../logging";
 import { MapWithOffset, push_to_map } from "./vector";
@@ -11,7 +11,7 @@ export class Cuboid extends Action {
         return map;
     }
     message(wandState) {
-        logging.log(`You have chosen to create a filled cuboid using ${wandState.firstBlock.id}`);
+        logging.log(`You have chosen to create a filled cuboid using ${wandState.firstBlock.typeId}`);
         logging.log(`The first click one corner of the cuboid.`);
         logging.log(`The second click is the opposite corner of the cuboid.`);
     }
