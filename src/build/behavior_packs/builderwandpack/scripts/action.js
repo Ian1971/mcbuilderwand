@@ -1,6 +1,7 @@
 import * as logging from "./logging";
 import { MapWithOffset } from "./drawing/vector";
-import { BlockLocation } from "mojang-minecraft";
+import { BlockLocation } from "@minecraft/server";
+//import * as minecraftUi from "@minecraft/server-ui"
 import { WandState } from "./enums";
 export class PlayerMessage {
     constructor(wandState, dialog, player) {

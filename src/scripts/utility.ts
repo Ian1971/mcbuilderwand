@@ -1,4 +1,4 @@
-import { world, BlockLocation, BlockType } from "mojang-minecraft";
+import { world, BlockLocation, BlockType } from "@minecraft/server";
 
 export default class Utilities {
   static fillBlock(

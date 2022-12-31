@@ -1,4 +1,4 @@
-import { BlockLocation } from "mojang-minecraft";
+import { BlockLocation } from "@minecraft/server";
 import * as vector from "./vector";
 import { Action } from "./../action";
 import * as logging from "./../logging";

@@ -1,4 +1,4 @@
-import { Block, BlockLocation } from "mojang-minecraft";
+import { Block, BlockLocation } from "@minecraft/server";
 import {MapWithOffset, push_to_map_axis} from "./vector";
 import {Action, PlayerWandState} from "./../action"
 import * as logging from "./../logging"
@@ -18,7 +18,7 @@ export class Wall extends Action {
     }
 
     message(wandState: PlayerWandState){
-        logging.log(`You have chosen to create a wall using ${wandState.firstBlock.id}`);
+        logging.log(`You have chosen to create a wall using ${wandState.firstBlock.typeId}`);
         logging.log(`The first click is the start of the bottom wall.`);
         logging.log(`The second click is the end of the top of wall. (or vice-versa)`);
     }

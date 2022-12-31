@@ -75,6 +75,7 @@ function clean_localmc(callbackFunction) {
 }
 
 function deploy_localmc_behavior_packs() {
+  //console.log(mcdir + "development_behavior_packs/" + bpfoldername);
   return gulp
     .src(["build/behavior_packs/" + bpfoldername + "/**/*"])
     .pipe(gulp.dest(mcdir + "development_behavior_packs/" + bpfoldername));

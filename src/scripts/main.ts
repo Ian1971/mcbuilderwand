@@ -1,5 +1,5 @@
-import { world, Block, BlockType, Entity, ItemUseEvent, MinecraftBlockTypes, PlayerJoinEvent, PlayerLeaveEvent, ItemUseOnEvent, BlockLocation, Player, StringBlockProperty, BlockPermutation } from "mojang-minecraft";
-import {MessageFormData, ActionFormData, ModalFormData} from "mojang-minecraft-ui"
+import { world, system, Block, BlockType, Entity, ItemUseEvent, MinecraftBlockTypes, PlayerJoinEvent, PlayerLeaveEvent, ItemUseOnEvent, BlockLocation, Player, StringBlockProperty, BlockPermutation } from "@minecraft/server";
+import {MessageFormData, ActionFormData, ModalFormData} from "@minecraft/server-ui"
 import * as logging from "./logging";
 import * as enums from "./enums"
 import { MapWithOffset } from "./drawing/vector";
@@ -20,7 +20,7 @@ const directions = ["x", "y", "z"];
 
 function mainTick() {
   tickIndex++;
-
+  //world.say("mainTick.");
   // if (tickIndex % 10 === 0) {
   //   world.getDimension("overworld").runCommand("say alive");
   // }
@@ -40,13 +40,13 @@ function mainTick() {
 
         const optionForm = new ModalFormData()
         .title("Choose options");
-        optionForm.icon
+
         if (msg.wandState.action.keepReplaceOpt){
           optionForm.toggle("Keep existing blocks?", false);
         }
         optionForm.toggle("Place above chosen location?", false);
         if (msg.wandState.action.blockOpt){
-          optionForm.dropdown(`Use Block (selected = ${msg.wandState.firstBlock.id}`, ["selected","air", "water", "lava"], 0);
+          optionForm.dropdown(`Use Block (selected = ${msg.wandState.firstBlock.typeId}`, ["selected","air", "water", "lava"], 0);
         }
 
         if (msg.wandState.action.directionOpt){
@@ -56,7 +56,7 @@ function mainTick() {
         // logging.log(`about to show optionForm`);
         optionForm.show(msg.player).then(optionResponse => {
 
-          if (optionResponse.isCanceled){
+          if (optionResponse.canceled){
             playerWandStates.set(msg.player.name, new PlayerWandState());
             return;
           }
@@ -77,7 +77,7 @@ function mainTick() {
       }
   });
 
-  
+  system.run(mainTick);
 }
 
 //clicks in the air
@@ -85,7 +85,7 @@ function itemUse(args: ItemUseEvent) {
   //this event will be for right click with the wand when not close enough to a block
   //it will be useful for placing blocks in the air
   //it will choose the block immediately below the player
-
+  //world.say("itemUse.");
   //cooldown
   let tickSince = tickIndex - lastActionTick;
   if (lastActionTick > -1 && (tickSince < coolDown)) {
@@ -95,7 +95,7 @@ function itemUse(args: ItemUseEvent) {
 
   lastActionTick = tickIndex;
 
-  if (args.item.id === builderWanderId) {
+  if (args.item.typeId === builderWanderId) {
     useWand(args.source, new BlockLocation(args.source.location.x, args.source.location.y-1, args.source.location.z));
   }
 }
@@ -114,7 +114,7 @@ function itemUseOn(args: ItemUseOnEvent) {
   // logging.log(`itemUseOn ${args.item.id} lastActionTick:${lastActionTick}, tickIndex:${tickIndex}`);
 
   //some player has used the wand
-  if (args.item.id === builderWanderId) {
+  if (args.item.typeId === builderWanderId) {
     useWand(args.source, args.blockLocation);
   }
 }
@@ -155,7 +155,7 @@ async function useWand(source:Entity, blockLocation:BlockLocation) {
     let response = await actionChooseForm.show(player);
 
     if(response){
-      if (response.isCanceled){
+      if (response.canceled){
         playerWandStates.set(player.name, new PlayerWandState());
         return;
       }
@@ -226,7 +226,8 @@ function transitionToInitial(entity:Entity){
   let wandState = new PlayerWandState();
   playerWandStates.set(entity.nameTag, wandState)
 }
-
+//world.say("setup.");
+//system.run(mainTick);
 world.events.tick.subscribe(mainTick);
 world.events.playerJoin.subscribe(playerJoin);
 world.events.playerLeave.subscribe(playerLeave);

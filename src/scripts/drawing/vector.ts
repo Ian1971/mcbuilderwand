@@ -1,4 +1,4 @@
-import { BlockLocation } from "mojang-minecraft";
+import { BlockLocation } from "@minecraft/server";
 import * as logging from "./../logging";
 
 export function vectorAToB(startPos: BlockLocation, endPos: BlockLocation):BlockLocation

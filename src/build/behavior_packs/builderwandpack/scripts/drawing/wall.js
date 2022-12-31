@@ -10,7 +10,7 @@ export class Wall extends Action {
         return map;
     }
     message(wandState) {
-        logging.log(`You have chosen to create a wall using ${wandState.firstBlock.id}`);
+        logging.log(`You have chosen to create a wall using ${wandState.firstBlock.typeId}`);
         logging.log(`The first click is the start of the bottom wall.`);
         logging.log(`The second click is the end of the top of wall. (or vice-versa)`);
     }

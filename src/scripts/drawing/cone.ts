@@ -1,4 +1,4 @@
-import { Block, BlockLocation, BoolBlockProperty, Player, world } from "mojang-minecraft";
+import { Block, BlockLocation, BoolBlockProperty, Player, world } from "@minecraft/server";
 import {above, vectorAToB, MapWithOffset, getWidthAndLengthWithAxis, push_to_map_axis} from "./vector";
 import {Action, PlayerWandState} from "./../action"
 import { cone_of_radius } from "./cylinder";
@@ -22,7 +22,7 @@ export class Cone extends Action {
     }
 
     message(wandState: PlayerWandState){
-        logging.log(`You have chosen to create a cone using ${wandState.firstBlock.id}`);
+        logging.log(`You have chosen to create a cone using ${wandState.firstBlock.typeId}`);
         logging.log(`The first click is the center of the base circle of the cone.`);
         logging.log(`The second click is the radius and height of the cone.`);
     }

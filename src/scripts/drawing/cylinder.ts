@@ -1,4 +1,4 @@
-import { Block, BlockLocation, BoolBlockProperty, Player, world } from "mojang-minecraft";
+import { Block, BlockLocation, BoolBlockProperty, Player, world } from "@minecraft/server";
 import {above, vectorAToB, MapWithOffset, getWidthAndLengthWithAxis, push_to_map_axis} from "./vector";
 import {Action, PlayerWandState} from "../action"
 import * as logging from "../logging"
@@ -21,7 +21,7 @@ export class Cylinder extends Action {
     }
 
     message(wandState: PlayerWandState){
-        logging.log(`You have chosen to create a cylinder using ${wandState.firstBlock.id}`);
+        logging.log(`You have chosen to create a cylinder using ${wandState.firstBlock.typeId}`);
         logging.log(`The first click is the center of the base circle of the cylinder.`);
         logging.log(`The second click is the radius and height of the cylinder.`);
     }

@@ -1,4 +1,4 @@
-import { BlockLocation, Player } from "mojang-minecraft";
+import { BlockLocation, Player } from "@minecraft/server";
 import * as vector from "./vector";
 import {Action, PlayerWandState} from "./../action"
 import * as logging from "./../logging"
